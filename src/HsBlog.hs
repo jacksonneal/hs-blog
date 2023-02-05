@@ -1,14 +1,14 @@
-module Main where
+module HsBlog where
 
-import Convert (convert)
-import Html qualified
-import Markup qualified
+import HsBlog.Convert (convert)
+import qualified HsBlog.Html
+import qualified HsBlog.Markup
 import System.Directory (doesFileExist)
 import System.Environment (getArgs)
 import System.IO (getContents')
 
-process :: Html.Title -> String -> String
-process title = Html.render . convert title . Markup.parse
+process :: HsBlog.Html.Title -> String -> String
+process title = HsBlog.Html.render . convert title . HsBlog.Markup.parse
 
 main :: IO ()
 main = do
