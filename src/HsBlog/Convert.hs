@@ -1,21 +1,21 @@
 module HsBlog.Convert where
 
-import qualified HsBlog.Html
-import qualified HsBlog.Markup
+import qualified HsBlog.Html as Html
+import qualified HsBlog.Markup as Markup
 
-convertStructure :: HsBlog.Markup.Structure -> HsBlog.Html.Structure
+convertStructure :: Markup.Structure -> Html.Structure
 convertStructure structure =
   case structure of
-    HsBlog.Markup.Heading n txt ->
-      HsBlog.Html.h_ n txt
-    HsBlog.Markup.Paragraph p ->
-      HsBlog.Html.p_ p
-    HsBlog.Markup.UnorderedList list ->
-      HsBlog.Html.ul_ $ map HsBlog.Html.p_ list
-    HsBlog.Markup.OrderedList list ->
-      HsBlog.Html.ol_ $ map HsBlog.Html.p_ list
-    HsBlog.Markup.CodeBlock list ->
-      HsBlog.Html.code_ (unlines list)
+    Markup.Heading n txt ->
+      Html.h_ n $ Html.txt_ txt
+    Markup.Paragraph p ->
+      Html.p_ $ Html.txt_ p
+    Markup.UnorderedList list ->
+      Html.ul_ $ map (Html.p_ . Html.txt_) list
+    Markup.OrderedList list ->
+      Html.ol_ $ map (Html.p_ . Html.txt_) list
+    Markup.CodeBlock list ->
+      Html.code_ (unlines list)
 
-convert :: HsBlog.Html.Title -> HsBlog.Markup.Document -> HsBlog.Html.Html
-convert title = HsBlog.Html.html_ title . foldMap convertStructure
+convert :: Html.Title -> Markup.Document -> Html.Html
+convert title = Html.html_ title . foldMap convertStructure

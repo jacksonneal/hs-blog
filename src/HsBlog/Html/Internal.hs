@@ -2,9 +2,15 @@ module HsBlog.Html.Internal where
 
 import Numeric.Natural
 
+-- * Types
+
 newtype Html = Html String
 
 newtype Structure = Structure String
+
+newtype Content = Content String
+
+type Title = String
 
 instance Semigroup Structure where
   (<>) c1 c2 =
@@ -13,18 +19,32 @@ instance Semigroup Structure where
 instance Monoid Structure where
   mempty = Structure ""
 
-type Title = String
+instance Semigroup Content where
+  (<>) c1 c2 =
+    Content (getContentString c1 <> getContentString c2)
+
+instance Monoid Content where
+  mempty = Content ""
 
 -- * EDSL
 
 html_ :: Title -> Structure -> Html
-html_ title (Structure content) = Html (el "html" (el "head" (el "title" title) <> el "body" content))
+html_ title (Structure content) =
+  Html
+    ( el
+        "html"
+        ( el
+            "head"
+            (el "title" title)
+            <> el "body" content
+        )
+    )
 
-p_ :: String -> Structure
-p_ = Structure . el "p" . escape
+p_ :: Content -> Structure
+p_ = Structure . el "p" . getContentString
 
-h_ :: Natural -> String -> Structure
-h_ n = Structure . el ("h" <> show n) . escape
+h_ :: Natural -> Content -> Structure
+h_ n = Structure . el ("h" <> show n) . getContentString
 
 ul_ :: [Structure] -> Structure
 ul_ = Structure . el "ul" . concatMap (el "li" . getStructureString)
@@ -35,6 +55,31 @@ ol_ = Structure . el "ol" . concatMap (el "li" . getStructureString)
 code_ :: String -> Structure
 code_ = Structure . el "pre" . escape
 
+-- * Content
+
+txt_ :: String -> Content
+txt_ = Content . escape
+
+link_ :: FilePath -> Content -> Content
+link_ path content =
+  Content $
+    elAttr
+      "a"
+      ("href=\"" <> escape path <> "\"")
+      (getContentString content)
+
+img_ :: FilePath -> Content
+img_ path =
+  Content $ "<img src=\"" <> escape path <> "\">"
+
+b_ :: Content -> Content
+b_ content =
+  Content $ el "b" (getContentString content)
+
+i_ :: Content -> Content
+i_ content =
+  Content $ el "i" (getContentString content)
+
 -- * Render
 
 render :: Html -> String
@@ -43,10 +88,18 @@ render (Html x) = x
 -- * Util
 
 el :: String -> String -> String
-el tag content = "<" <> tag <> ">" <> content <> "</" <> tag <> ">"
+el tag content =
+  "<" <> tag <> ">" <> content <> "</" <> tag <> ">"
+
+elAttr :: String -> String -> String -> String
+elAttr tag attrs content =
+  "<" <> tag <> " " <> attrs <> ">" <> content <> "</" <> tag <> ">"
 
 getStructureString :: Structure -> String
 getStructureString (Structure content) = content
+
+getContentString :: Content -> String
+getContentString (Content content) = content
 
 escape :: String -> String
 escape =

@@ -9,6 +9,8 @@ import System.Directory (doesFileExist)
 import System.Exit (exitFailure)
 import System.IO
 
+-- TODO: --replace flag
+
 main :: IO ()
 main = do
   options <- parse
