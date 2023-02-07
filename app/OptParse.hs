@@ -8,6 +8,7 @@ module OptParse
 where
 
 import Data.Maybe (fromMaybe)
+import GHC.IO.FD (stdout)
 import Options.Applicative
 
 ------------------------------------------------
@@ -88,7 +89,7 @@ pSingleOutput =
 
 -- | Input file parser
 pInputFile :: Parser SingleInput
-pInputFile = fmap InputFile parser
+pInputFile = InputFile <$> parser
   where
     parser =
       strOption
