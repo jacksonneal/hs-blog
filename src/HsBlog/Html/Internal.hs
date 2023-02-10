@@ -1,12 +1,15 @@
 module HsBlog.Html.Internal where
 
 import Numeric.Natural
+import Prelude hiding (head)
 
 -- * Types
 
 newtype Html = Html String
 
 newtype Structure = Structure String
+
+newtype Head = Head String
 
 newtype Content = Content String
 
@@ -19,6 +22,13 @@ instance Semigroup Structure where
 instance Monoid Structure where
   mempty = Structure ""
 
+instance Semigroup Head where
+  (<>) (Head h1) (Head h2) =
+    Head (h1 <> h2)
+
+instance Monoid Head where
+  mempty = Head ""
+
 instance Semigroup Content where
   (<>) c1 c2 =
     Content (getContentString c1 <> getContentString c2)
@@ -28,16 +38,13 @@ instance Monoid Content where
 
 -- * EDSL
 
-html_ :: Title -> Structure -> Html
-html_ title (Structure content) =
+html_ :: Head -> Structure -> Html
+html_ (Head head) (Structure content) =
   Html
     ( el
         "html"
-        ( el
-            "head"
-            (el "title" title)
-            <> el "body" content
-        )
+        (el "head" head)
+        <> el "body" content
     )
 
 p_ :: Content -> Structure
@@ -54,6 +61,19 @@ ol_ = Structure . el "ol" . concatMap (el "li" . getStructureString)
 
 code_ :: String -> Structure
 code_ = Structure . el "pre" . escape
+
+-- * Head
+
+title_ :: String -> Head
+title_ = Head . el "title" . escape
+
+stylesheet_ :: FilePath -> Head
+stylesheet_ path =
+  Head $ "<link rel=\"stylesheet\" type=\"text/css\" href=\"" <> escape path <> "\">"
+
+meta_ :: String -> String -> Head
+meta_ name content =
+  Head $ "<meta name=\"" <> escape name <> "\" content=\"" <> escape content <> "\">"
 
 -- * Content
 

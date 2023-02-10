@@ -16,8 +16,8 @@ main :: IO ()
 main = do
   options <- parse
   case options of
-    ConvertDir input output ->
-      HsBlog.convertDirectory input output
+    ConvertDir input output env ->
+      HsBlog.convertDirectory env input output
     ConvertSingle input output ->
       let withInputHandle :: (String -> Handle -> IO a) -> IO a
           withInputHandle action =
