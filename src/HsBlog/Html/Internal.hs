@@ -13,8 +13,6 @@ newtype Head = Head String
 
 newtype Content = Content String
 
-type Title = String
-
 instance Semigroup Structure where
   (<>) c1 c2 =
     Structure (getStructureString c1 <> getStructureString c2)
